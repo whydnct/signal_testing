@@ -4,34 +4,36 @@
 #include <signal.h>
 #include <sys/wait.h>
 
-void child_sigint_handler(int signum) {
+void child_handler(int signum) {
 	(void)signum;
-    printf("Child process received SIGINT signal.\n");
-    printf("Wanna kill it? Uncomment exit(0)...\n");
-    //exit(0);
+    printf("Child.\n");
+    exit(0);
+}
+
+void dad_handler(int signum) {
+	(void)signum;
+    printf("Dad.\n");
 }
 
 int main() {
     pid_t child_pid;
 
-    // Create a new process
-    child_pid = fork();
 
-	signal(SIGINT, SIG_IGN);
 	while(1)
 	{
+	    //signal(SIGINT, SIG_IGN);
+	    signal(SIGINT, dad_handler);
+		// Create a new process
+		child_pid = fork();
   		if (child_pid == 0) {
+			printf("Child process with PID %d is running.\n", child_pid);
   		    // This code is executed by the child process
-			signal(SIGINT, child_sigint_handler);
+			signal(SIGINT, child_handler);
   		    while (1) {
 				pause();
-  		        // Infinite loop
 			}
 		}
       	// This code is executed by the parent process
-      	printf("Child process with PID %d is running.\n", child_pid);
-      	// Parent process can continue to do other tasks
-		wait(NULL);
 		printf("Child died\n");
 		pause();
     }
