@@ -1,6 +1,6 @@
 OS := $(shell uname -s)
 
-NAME := signal_testing
+NAME := test.out
 
 #------------------------------------------------#
 #   INGREDIENTS                                  #

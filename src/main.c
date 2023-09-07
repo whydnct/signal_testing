@@ -17,14 +17,21 @@ void child_carer(int signum, siginfo_t *info, void *context) {
 	(void)signum;
 	(void)info;
 	(void)context;
-	write(1, "\x1b[31mI let the child live.\n\x1b[0m", 31);
+	write(1, "\x1b[31mThe child has been well raised.\n\x1b[0m", 41);
 }
 
-void dad_handler(int signum, siginfo_t *info, void *context) {
+void dad(int signum, siginfo_t *info, void *context) {
 	(void)signum;
 	(void)info;
 	(void)context;
 	write(1, "\x1b[31mI'm Dad.\n\x1b[0m", 18);
+}
+
+void grandad(int signum, siginfo_t *info, void *context) {
+	(void)signum;
+	(void)info;
+	(void)context;
+	write(1, "\x1b[31mI'm now grandpa!.\n\x1b[0m", 28);
 }
 
 int main(int argc, char **argv) {
@@ -36,13 +43,14 @@ int main(int argc, char **argv) {
 	sa.sa_flags = SA_RESTART;
 	while(1)
 	{
-		if (argc > 1)
-			sa.sa_sigaction = child_killer;
-		else
-			sa.sa_sigaction = child_carer;
+		sa.sa_sigaction = dad;
 		sigaction(SIGINT, &sa, NULL);
 		child_pid = fork();
   		if (child_pid == 0) {
+			if (argc > 1)
+				sa.sa_sigaction = child_killer;
+			else
+				sa.sa_sigaction = child_carer;
 			write(1, "A child was born.\n", 18);
 			sigaction(SIGINT, &sa, NULL);
   			// This code is executed by the child process
@@ -52,10 +60,9 @@ int main(int argc, char **argv) {
 			}
 		}
 		wait((int *)&child_pid);
-	  	// This code is executed by the parent process
+		sa.sa_sigaction = grandad;
+		sigaction(SIGINT, &sa, NULL);
 		write(1, "Another round?\n", 15);
-		// sa.sa_sigaction = dad_handler;
-		// sigaction(SIGINT, &sa, NULL);
 		pause();
 	}
 
